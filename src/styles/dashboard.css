@@ -1,0 +1,61 @@
+.layout {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: white;
+  padding: 20px;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+}
+
+.logo h2 {
+  color: #3B82F6;
+  margin-bottom: 30px;
+}
+
+.nav {
+  list-style: none;
+}
+
+.nav li {
+  padding: 12px 0;
+  cursor: pointer;
+  color: #333;
+}
+
+.nav li:hover {
+  color: #3B82F6;
+}
+
+.main {
+  flex: 1;
+  padding: 30px;
+}
+
+.header {
+  margin-bottom: 30px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.card h3 {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.critical h3 {
+  color: #EF4444;
+}
