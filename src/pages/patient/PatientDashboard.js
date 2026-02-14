@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { signOut } from "firebase/auth";
-import { auth, db } from "../../firebase/firebase";
+import { auth, db } from "../../firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 function PatientDashboard() {
   const navigate = useNavigate();
 
-  const [doctorName, setDoctorName] = useState("");
+  const [doctorEmail, setDoctorEmail] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [reason, setReason] = useState("");
@@ -24,7 +24,7 @@ function PatientDashboard() {
       await addDoc(collection(db, "appointments"), {
         patientId: auth.currentUser.uid,
         patientEmail: auth.currentUser.email,
-        doctorName,
+        doctorEmail: doctorEmail,   // ✅ IMPORTANT
         date,
         time,
         reason,
@@ -32,7 +32,7 @@ function PatientDashboard() {
       });
 
       alert("Appointment Booked Successfully!");
-      setDoctorName("");
+      setDoctorEmail("");
       setDate("");
       setTime("");
       setReason("");
@@ -44,16 +44,14 @@ function PatientDashboard() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.title}>Patient Dashboard</h1>
-
-        <h2 style={styles.subtitle}>Book Appointment</h2>
+        <h1>Patient Dashboard</h1>
 
         <form onSubmit={handleAppointment} style={styles.form}>
           <input
-            type="text"
-            placeholder="Doctor Name"
-            value={doctorName}
-            onChange={(e) => setDoctorName(e.target.value)}
+            type="email"
+            placeholder="Doctor Email"
+            value={doctorEmail}
+            onChange={(e) => setDoctorEmail(e.target.value)}
             required
             style={styles.input}
           />
@@ -82,12 +80,12 @@ function PatientDashboard() {
             style={styles.textarea}
           />
 
-          <button type="submit" style={styles.bookButton}>
+          <button type="submit" style={styles.button}>
             Book Appointment
           </button>
         </form>
 
-        <button onClick={handleLogout} style={styles.logoutButton}>
+        <button onClick={handleLogout} style={styles.logout}>
           Logout
         </button>
       </div>
@@ -105,20 +103,9 @@ const styles = {
   },
   card: {
     width: "400px",
-    backgroundColor: "#ffffff",
-    padding: "40px",
-    borderRadius: "16px",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: "10px",
-    color: "#2c7be5",
-  },
-  subtitle: {
-    textAlign: "center",
-    marginBottom: "25px",
-    color: "#555",
+    backgroundColor: "white",
+    padding: "30px",
+    borderRadius: "10px",
   },
   form: {
     display: "flex",
@@ -126,37 +113,20 @@ const styles = {
     gap: "15px",
   },
   input: {
-    padding: "12px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "14px",
+    padding: "10px",
   },
   textarea: {
-    padding: "12px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "14px",
-    minHeight: "80px",
-    resize: "none",
+    padding: "10px",
   },
-  bookButton: {
-    padding: "12px",
+  button: {
+    padding: "10px",
     backgroundColor: "#2c7be5",
     color: "white",
     border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "bold",
   },
-  logoutButton: {
-    marginTop: "20px",
-    padding: "10px",
-    backgroundColor: "#e63757",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    width: "100%",
+  logout: {
+    marginTop: "15px",
+    padding: "8px",
   },
 };
 

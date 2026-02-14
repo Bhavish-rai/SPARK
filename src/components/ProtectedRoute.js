@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { auth, db } from "../firebase/firebase";
+import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 

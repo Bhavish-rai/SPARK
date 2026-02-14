@@ -1,178 +1,118 @@
-import { useEffect, useState } from "react";
-import { signOut } from "firebase/auth";
-import { auth, db } from "../../firebase/firebase";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   collection,
+  query,
+  where,
   getDocs,
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+import { db, auth } from "../../firebase"; // Make sure firebase.js is inside src folder
 
 function DoctorDashboard() {
   const navigate = useNavigate();
-  const [appointments, setAppointments] = useState([]);
+  const doctorEmail = auth.currentUser?.email;
 
-  const fetchAppointments = async () => {
-    const querySnapshot = await getDocs(collection(db, "appointments"));
-    const data = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setAppointments(data);
-  };
+  const [appointments, setAppointments] = useState([]);
+  const [patients, setPatients] = useState([]);
+
+  // ✅ Fetch Appointments
+  const fetchAppointments = useCallback(async () => {
+    if (!doctorEmail) return;
+
+    try {
+      const q = query(
+        collection(db, "appointments"),
+        where("doctorEmail", "==", doctorEmail)
+      );
+
+      const snapshot = await getDocs(q);
+
+      const data = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+
+      setAppointments(data);
+
+      const uniquePatients = [
+        ...new Set(data.map((a) => a.patientEmail)),
+      ];
+      setPatients(uniquePatients);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    }
+  }, [doctorEmail]);
 
   useEffect(() => {
     fetchAppointments();
-  }, []);
+  }, [fetchAppointments]);
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate("/");
+  // ✅ Update Status
+  const updateStatus = async (id, status) => {
+    try {
+      const appointmentRef = doc(db, "appointments", id);
+      await updateDoc(appointmentRef, { status });
+      fetchAppointments();
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
   };
 
-  const updateStatus = async (id, status) => {
-    await updateDoc(doc(db, "appointments", id), {
-      status: status,
-    });
-    fetchAppointments();
+  const handleLogout = async () => {
+    await auth.signOut();
+    navigate("/login");
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Doctor Dashboard</h1>
+    <div style={{ padding: "20px" }}>
+      <h2>Doctor Dashboard</h2>
 
-        <h2 style={styles.subtitle}>Patient Appointments</h2>
+      <button onClick={handleLogout}>Logout</button>
 
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Patient</th>
-              <th style={styles.th}>Doctor</th>
-              <th style={styles.th}>Date</th>
-              <th style={styles.th}>Time</th>
-              <th style={styles.th}>Reason</th>
-              <th style={styles.th}>Status</th>
-              <th style={styles.th}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {appointments.length === 0 ? (
-              <tr>
-                <td colSpan="7" style={styles.noData}>
-                  No Appointments Found
-                </td>
-              </tr>
-            ) : (
-              appointments.map((appointment) => (
-                <tr key={appointment.id}>
-                  <td style={styles.td}>{appointment.patientEmail}</td>
-                  <td style={styles.td}>{appointment.doctorName}</td>
-                  <td style={styles.td}>{appointment.date}</td>
-                  <td style={styles.td}>{appointment.time}</td>
-                  <td style={styles.td}>{appointment.reason}</td>
-                  <td style={styles.td}>{appointment.status}</td>
-                  <td style={styles.td}>
-                    <button
-                      style={styles.acceptBtn}
-                      onClick={() =>
-                        updateStatus(appointment.id, "approved")
-                      }
-                      disabled={appointment.status !== "pending"}
-                    >
-                      Accept
-                    </button>
+      <h3 style={{ marginTop: "20px" }}>Appointments</h3>
 
-                    <button
-                      style={styles.rejectBtn}
-                      onClick={() =>
-                        updateStatus(appointment.id, "rejected")
-                      }
-                      disabled={appointment.status !== "pending"}
-                    >
-                      Reject
-                    </button>
-                  </td>
-                </tr>
-              ))
+      {appointments.length === 0 ? (
+        <p>No appointments found</p>
+      ) : (
+        appointments.map((appointment) => (
+          <div
+            key={appointment.id}
+            style={{
+              border: "1px solid #ccc",
+              padding: "10px",
+              marginBottom: "10px",
+            }}
+          >
+            <p><strong>Patient:</strong> {appointment.patientEmail}</p>
+            <p><strong>Date:</strong> {appointment.date}</p>
+            <p><strong>Time:</strong> {appointment.time}</p>
+            <p><strong>Status:</strong> {appointment.status}</p>
+
+            {appointment.status === "pending" && (
+              <>
+                <button
+                  onClick={() => updateStatus(appointment.id, "approved")}
+                  style={{ marginRight: "10px" }}
+                >
+                  Approve
+                </button>
+
+                <button
+                  onClick={() => updateStatus(appointment.id, "rejected")}
+                >
+                  Reject
+                </button>
+              </>
             )}
-          </tbody>
-        </table>
+          </div>
+        ))
+      )}
 
-        <button style={styles.logoutBtn} onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
+      <h3>Total Patients: {patients.length}</h3>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #2c7be5, #00d4ff)",
-    padding: "40px",
-  },
-  card: {
-    backgroundColor: "white",
-    padding: "30px",
-    borderRadius: "12px",
-    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: "10px",
-    color: "#2c7be5",
-  },
-  subtitle: {
-    textAlign: "center",
-    marginBottom: "20px",
-    color: "#555",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
-  th: {
-    borderBottom: "2px solid #ddd",
-    padding: "10px",
-    textAlign: "left",
-  },
-  td: {
-    padding: "10px",
-    borderBottom: "1px solid #eee",
-  },
-  noData: {
-    textAlign: "center",
-    padding: "20px",
-  },
-  acceptBtn: {
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    marginRight: "5px",
-    cursor: "pointer",
-  },
-  rejectBtn: {
-    backgroundColor: "#dc3545",
-    color: "white",
-    border: "none",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    cursor: "pointer",
-  },
-  logoutBtn: {
-    marginTop: "20px",
-    padding: "10px 20px",
-    backgroundColor: "#333",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-  },
-};
 
 export default DoctorDashboard;

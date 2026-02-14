@@ -3,7 +3,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup
 } from "firebase/auth";
-import { auth, provider, db } from "../../firebase/firebase";
+import { auth, provider, db } from "../../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 import "../../styles/login.css";
