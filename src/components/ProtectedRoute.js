@@ -10,6 +10,7 @@ function ProtectedRoute({ children, allowedRole }) {
 
   useEffect(() => {
     // Use onAuthStateChanged to handle refresh "lag"
+    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const docRef = doc(db, "users", user.uid);

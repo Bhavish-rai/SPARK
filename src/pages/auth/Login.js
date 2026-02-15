@@ -5,6 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 import "../../styles/auth.css";
 
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
