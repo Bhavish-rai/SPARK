@@ -4,37 +4,30 @@ import PatientDashboard from "./pages/patient/PatientDashboard";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Doctors from "./components/Doctors"; 
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/doctors" element={<Doctors />} />
 
-        {/* Doctor Route */}
-        <Route
-          path="/doctor"
-          element={
-            <ProtectedRoute allowedRole="doctor">
-              <DoctorDashboard />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/doctor" element={
+          <ProtectedRoute allowedRole="doctor">
+            <DoctorDashboard />
+          </ProtectedRoute>
+        } />
 
-        {/* Patient Route */}
-        <Route
-          path="/patient"
-          element={
-            <ProtectedRoute allowedRole="patient">
-              <PatientDashboard />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/patient" element={
+          <ProtectedRoute allowedRole="patient">
+            <PatientDashboard />
+          </ProtectedRoute>
+        } />
       </Routes>
     </Router>
   );
 }
-
 export default App;

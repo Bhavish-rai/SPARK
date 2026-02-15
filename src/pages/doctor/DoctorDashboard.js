@@ -1,116 +1,152 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { collection, query, where, getDocs, updateDoc, doc, setDoc, arrayUnion } from "firebase/firestore";
+import { auth, db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  doc,
-} from "firebase/firestore";
-import { db, auth } from "../../firebase"; // Make sure firebase.js is inside src folder
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import "../../styles/dashboard.css";
 
 function DoctorDashboard() {
   const navigate = useNavigate();
   const doctorEmail = auth.currentUser?.email;
-
+  const [view, setView] = useState("patients"); 
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [conditionNote, setConditionNote] = useState("");
 
-  // ✅ Fetch Appointments
-  const fetchAppointments = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (!doctorEmail) return;
+    const qA = query(collection(db, "appointments"), where("doctorEmail", "==", doctorEmail), where("status", "==", "pending"));
+    const snapA = await getDocs(qA);
+    setAppointments(snapA.docs.map(d => ({ id: d.id, ...d.data() })));
 
-    try {
-      const q = query(
-        collection(db, "appointments"),
-        where("doctorEmail", "==", doctorEmail)
-      );
-
-      const snapshot = await getDocs(q);
-
-      const data = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data(),
-      }));
-
-      setAppointments(data);
-
-      const uniquePatients = [
-        ...new Set(data.map((a) => a.patientEmail)),
-      ];
-      setPatients(uniquePatients);
-    } catch (error) {
-      console.error("Error fetching appointments:", error);
-    }
+    const qP = query(collection(db, "doctors_patients"), where("doctorEmail", "==", doctorEmail));
+    const snapP = await getDocs(qP);
+    setPatients(snapP.docs.map(d => ({ id: d.id, ...d.data() })));
   }, [doctorEmail]);
 
-  useEffect(() => {
-    fetchAppointments();
-  }, [fetchAppointments]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  // ✅ Update Status
-  const updateStatus = async (id, status) => {
+  const handleApprove = async (app) => {
     try {
-      const appointmentRef = doc(db, "appointments", id);
-      await updateDoc(appointmentRef, { status });
-      fetchAppointments();
-    } catch (error) {
-      console.error("Error updating status:", error);
-    }
+      const appRef = doc(db, "appointments", app.id);
+      await updateDoc(appRef, { status: "approved" });
+
+      const pRef = doc(db, "doctors_patients", app.id);
+      await setDoc(pRef, {
+        ...app,
+        docId: app.id,
+        history: [{ 
+          date: new Date().toLocaleDateString(), 
+          sleep: Number(app.sleepHours) || 0, 
+          note: "Record Opened: Appointment Approved." 
+        }]
+      });
+
+      alert("Patient Approved!");
+      fetchData();
+      setView("patients");
+    } catch (e) { console.error(e); }
   };
 
-  const handleLogout = async () => {
-    await auth.signOut();
-    navigate("/login");
+  const updateCondition = async () => {
+    if (!selectedPatient || !conditionNote) return;
+    try {
+      const targetId = selectedPatient.docId || selectedPatient.id;
+      const pRef = doc(db, "doctors_patients", targetId);
+      
+      await updateDoc(pRef, {
+        history: arrayUnion({ 
+          date: new Date().toLocaleDateString(), 
+          sleep: Number(selectedPatient.sleepHours) || 0, 
+          note: conditionNote 
+        })
+      });
+
+      alert("Clinical Status Updated");
+      setConditionNote("");
+      fetchData(); 
+    } catch (e) { alert("Error: Patient record not found. Try re-approving."); }
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Doctor Dashboard</h2>
+    <div className="doc-layout">
+      <nav className="doc-nav">
+        <div className="nav-brand">✨ SparkHealth <span>Clinical</span></div>
+        <div className="nav-menu">
+          <button className={view === "patients" ? "active" : ""} onClick={() => {setView("patients"); setSelectedPatient(null);}}>Patient List</button>
+          <button className={view === "requests" ? "active" : ""} onClick={() => {setView("requests"); setSelectedPatient(null);}}>
+            Requests <span className="count-badge">{appointments.length}</span>
+          </button>
+        </div>
+        <button className="btn-logout-pro" onClick={() => {auth.signOut(); navigate("/");}}>Sign Out</button>
+      </nav>
 
-      <button onClick={handleLogout}>Logout</button>
-
-      <h3 style={{ marginTop: "20px" }}>Appointments</h3>
-
-      {appointments.length === 0 ? (
-        <p>No appointments found</p>
-      ) : (
-        appointments.map((appointment) => (
-          <div
-            key={appointment.id}
-            style={{
-              border: "1px solid #ccc",
-              padding: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            <p><strong>Patient:</strong> {appointment.patientEmail}</p>
-            <p><strong>Date:</strong> {appointment.date}</p>
-            <p><strong>Time:</strong> {appointment.time}</p>
-            <p><strong>Status:</strong> {appointment.status}</p>
-
-            {appointment.status === "pending" && (
-              <>
-                <button
-                  onClick={() => updateStatus(appointment.id, "approved")}
-                  style={{ marginRight: "10px" }}
-                >
-                  Approve
-                </button>
-
-                <button
-                  onClick={() => updateStatus(appointment.id, "rejected")}
-                >
-                  Reject
-                </button>
-              </>
-            )}
+      <div className="main-content">
+        <aside className="sidebar">
+          <h2 className="sidebar-title">{view === "patients" ? "Active Patients" : "New Inquiries"}</h2>
+          <div className="scroll-list">
+            {(view === "patients" ? patients : appointments).map(item => (
+              <div key={item.id} className={`list-card ${selectedPatient?.id === item.id ? "active-card" : ""}`} onClick={() => setSelectedPatient(item)}>
+                <h4>{item.name}</h4>
+                <p>{item.date} • {item.time}</p>
+              </div>
+            ))}
           </div>
-        ))
-      )}
+        </aside>
 
-      <h3>Total Patients: {patients.length}</h3>
+        <section className="terminal">
+          {selectedPatient ? (
+            <div className="medical-record">
+              <div className="record-header">
+                <div>
+                  <h1>{selectedPatient.name}</h1>
+                  <p className="sub-text">{selectedPatient.age}y/o • {selectedPatient.bloodGroup} • {selectedPatient.patientEmail}</p>
+                </div>
+                {view === "requests" && <button className="btn-primary-pro" onClick={() => handleApprove(selectedPatient)}>Confirm Approval</button>}
+              </div>
+
+              <div className="vitals-row">
+                <div className="v-card"><span>Weight</span><strong>{selectedPatient.weight} kg</strong></div>
+                <div className="v-card"><span>Height</span><strong>{selectedPatient.height} cm</strong></div>
+                <div className="v-card"><span>Contact</span><strong>{selectedPatient.phone}</strong></div>
+              </div>
+
+              <div className="chart-container">
+                <h3 style={{marginBottom: '20px'}}>Patient Wellness Trend</h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <AreaChart data={selectedPatient.history}>
+                    <defs><linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3}/><stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/></linearGradient></defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="date" hide />
+                    <YAxis axisLine={false} tickLine={false} />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="sleep" stroke="#14b8a6" fillOpacity={1} fill="url(#colorPv)" strokeWidth={3} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="clinical-notes">
+                <div className="history-timeline">
+                  {selectedPatient.history?.map((entry, i) => (
+                    <div key={i} className="timeline-item">
+                      <div className="timeline-marker"></div>
+                      <div className="timeline-content">
+                        <span className="time-date">{entry.date}</span>
+                        <p>{entry.note}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <textarea className="update-textarea" placeholder="Enter clinical assessment..." value={conditionNote} onChange={(e) => setConditionNote(e.target.value)} />
+                <button className="btn-primary-pro" onClick={updateCondition}>Confirm Clinical Update</button>
+              </div>
+            </div>
+          ) : (
+            <div className="welcome-screen"><h2>Select a patient to begin analysis</h2></div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

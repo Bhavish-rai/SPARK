@@ -1,0 +1,338 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+:root {
+  --primary: #14b8a6;
+  --primary-dark: #0d9488;
+  --bg-soft: #f1f5f9; /* Light slate lavender feel */
+  --text-deep: #0f172a;
+  --text-muted: #64748b;
+}
+
+.auth-page {
+  background-color: var(--bg-soft);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.auth-card {
+  background: white;
+  width: 90%;
+  max-width: 1200px;
+  min-height: 80vh;
+  border-radius: 50px; /* High rounding from reference image */
+  padding: 2.5rem 4rem;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Nav Styles */
+.auth-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4rem;
+}
+
+.logo { font-weight: 800; font-size: 1.4rem; color: var(--primary-dark); }
+.logo span { color: var(--text-deep); }
+.nav-links { display: flex; gap: 40px; }
+.nav-links a { text-decoration: none; color: var(--text-deep); font-weight: 600; font-size: 0.95rem; transition: 0.3s; }
+.nav-links a:hover { color: var(--primary); }
+
+.btn-outline {
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 10px 25px;
+  border-radius: 14px;
+  text-decoration: none;
+  font-weight: 700;
+  transition: 0.3s;
+}
+
+/* Split Section */
+.auth-split {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 80px;
+  align-items: center;
+  flex: 1;
+}
+
+/* Form Styles */
+.welcome-text { font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; color: var(--text-deep); }
+.sub-header { color: var(--text-muted); margin-bottom: 30px; }
+
+.input-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.input-field label { font-size: 0.9rem; font-weight: 700; color: var(--text-deep); }
+
+.input-field input {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 1rem;
+}
+
+.btn-confirm {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 18px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  transition: 0.3s;
+  margin-top: 10px;
+}
+
+.btn-confirm:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+/* Quote Side */
+.quote-container {
+  background: #f0fdfa; /* Soft teal background */
+  height: 100%;
+  border-radius: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 40px;
+}
+
+.quote-box { z-index: 2; position: relative; }
+.quote-icon { font-size: 6rem; color: var(--primary); opacity: 0.2; position: absolute; top: -50px; left: -20px; }
+.medical-quote { font-size: 2rem; color: var(--primary-dark); font-weight: 700; line-height: 1.4; }
+.quote-author { margin-top: 20px; color: var(--text-muted); font-weight: 600; font-size: 1.1rem; }
+
+.decorative-circle {
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 250px;
+  height: 250px;
+  background: var(--primary);
+  border-radius: 50%;
+  opacity: 0.1;
+}
+/* Doctors Gallery Specifics */
+.doctor-gallery {
+  padding-bottom: 5rem;
+}
+
+.gallery-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.gallery-header h1 { font-size: 2.8rem; font-weight: 800; color: var(--text-deep); }
+.gallery-header h1 span { color: var(--primary); }
+.gallery-header p { color: var(--text-muted); font-size: 1.1rem; }
+
+.doctor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.doc-profile-card {
+  background: #f8fafc;
+  border-radius: 30px;
+  overflow: hidden;
+  transition: 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.doc-profile-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--primary);
+  background: white;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+}
+
+.doc-image-wrapper {
+  height: 250px;
+  overflow: hidden;
+}
+
+.doc-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.doc-info {
+  padding: 25px;
+  text-align: center;
+}
+
+.doc-info h3 {
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+  color: var(--text-deep);
+}
+
+.specialty-tag {
+  display: inline-block;
+  background: #f0fdfa;
+  color: var(--primary-dark);
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.exp-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.btn-mini-book {
+  text-decoration: none;
+  background: var(--primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: block;
+}
+/* Text-Only Doctor Cards */
+.doc-profile-card.text-only {
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.doc-avatar {
+  width: 80px;
+  height: 80px;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  border: 2px solid var(--primary);
+}
+
+.doc-profile-card.text-only h3 {
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+  color: var(--text-deep);
+}
+
+.specialty-tag {
+  display: inline-block;
+  background: #f0fdfa;
+  color: var(--primary-dark);
+  padding: 6px 16px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+.role-switcher {
+  display: flex;
+  gap: 10px;
+  background: #f1f5f9;
+  padding: 5px;
+  border-radius: 14px;
+  margin-bottom: 25px;
+}
+
+.role-btn {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  color: #64748b;
+  transition: all 0.3s ease;
+}
+
+.role-btn.active {
+  background: white;
+  color: #14b8a6;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.doc-contact {
+  margin-bottom: 20px;
+}
+
+.doc-email {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: 500;
+  display: block;
+  word-break: break-all; /* Prevents long emails from breaking the card layout */
+}
+
+.doc-email:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* Ensure the card has enough space for the new content */
+.doc-profile-card.text-only {
+  min-height: 320px; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.email-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.email-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #f8fafc;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  color: var(--text-deep);
+}
+
+.btn-remove {
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.3s;
+}
+
+.btn-remove:hover {
+  background: #ef4444;
+  color: white;
+}

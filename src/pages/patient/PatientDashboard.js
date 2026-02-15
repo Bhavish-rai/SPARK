@@ -1,133 +1,149 @@
-import { useState } from "react";
-import { signOut } from "firebase/auth";
+import React, { useState } from "react";
+import { addDoc, collection } from "firebase/firestore";
 import { auth, db } from "../../firebase";
-import { collection, addDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import "../../styles/dashboard.css";
 
 function PatientDashboard() {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "", phone: "", age: "", gender: "", address: "",
+    height: "", weight: "", bloodGroup: "",
+    sleepHours: "", symptoms: "", medicalHistory: "", allergies: "",
+    doctorEmail: "", date: "", time: ""
+  });
 
-  const [doctorEmail, setDoctorEmail] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [reason, setReason] = useState("");
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await auth.signOut();
     navigate("/");
   };
 
-  const handleAppointment = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       await addDoc(collection(db, "appointments"), {
-        patientId: auth.currentUser.uid,
+        ...formData,
         patientEmail: auth.currentUser.email,
-        doctorEmail: doctorEmail,   // ✅ IMPORTANT
-        date,
-        time,
-        reason,
+        patientUid: auth.currentUser.uid,
         status: "pending",
+        createdAt: new Date()
       });
-
-      alert("Appointment Booked Successfully!");
-      setDoctorEmail("");
-      setDate("");
-      setTime("");
-      setReason("");
-    } catch (error) {
-      alert(error.message);
+      alert("Registration & Appointment Sent Successfully!");
+      setFormData({
+        name: "", phone: "", age: "", gender: "", address: "",
+        height: "", weight: "", bloodGroup: "",
+        sleepHours: "", symptoms: "", medicalHistory: "", allergies: "",
+        doctorEmail: "", date: "", time: ""
+      });
+    } catch (err) {
+      alert(err.message);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1>Patient Dashboard</h1>
+    <div className="dashboard-container">
+      <nav className="glass-nav">
+        <div className="logo">
+          <span className="logo-icon">✨</span> SparkHealth
+        </div>
+        <div className="nav-right">
+          <span className="user-badge">Patient Portal</span>
+          <button onClick={handleLogout} className="btn-secondary">Logout</button>
+        </div>
+      </nav>
+      
+      <main className="dashboard-content">
+        <header className="page-header">
+          <h1>Medical Intake Form</h1>
+          <p>Provide your clinical details below to help your specialist prepare for your consultation.</p>
+        </header>
 
-        <form onSubmit={handleAppointment} style={styles.form}>
-          <input
-            type="email"
-            placeholder="Doctor Email"
-            value={doctorEmail}
-            onChange={(e) => setDoctorEmail(e.target.value)}
-            required
-            style={styles.input}
-          />
+        <section className="form-card">
+          <form onSubmit={handleSubmit} className="health-form">
+            
+            <h3 className="section-divider"><span>01</span> Personal & Vitals</h3>
+            <div className="form-grid">
+              <div className="input-group">
+                <label>Full Name</label>
+                <input name="name" value={formData.name} onChange={handleChange} required placeholder="e.g. Alex John" />
+              </div>
+              <div className="input-group">
+                <label>Phone Number</label>
+                <input name="phone" value={formData.phone} onChange={handleChange} required placeholder="+91 555 000 0000" />
+              </div>
+              <div className="input-group">
+                <label>Age</label>
+                <input name="age" type="number" value={formData.age} onChange={handleChange} required />
+              </div>
+              <div className="input-group">
+                <label>Blood Group</label>
+                <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} required>
+                  <option value="">Select Group</option>
+                  <option>O+</option><option>A+</option><option>B+</option><option>AB+</option>
+                  <option>O-</option><option>A-</option><option>B-</option><option>AB-</option>
+                </select>
+              </div>
+              <div className="input-group">
+                <label>Height (cm)</label>
+                <input name="height" type="number" value={formData.height} onChange={handleChange} required />
+              </div>
+              <div className="input-group">
+                <label>Weight (kg)</label>
+                <input name="weight" type="number" value={formData.weight} onChange={handleChange} required />
+              </div>
+            </div>
 
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-            style={styles.input}
-          />
+            <h3 className="section-divider"><span>02</span> Clinical Background</h3>
+            <div className="form-grid">
+              <div className="input-group">
+                <label>Avg. Sleep (Hrs/Night)</label>
+                <input name="sleepHours" type="number" value={formData.sleepHours} onChange={handleChange} required />
+              </div>
+              <div className="input-group">
+                <label>Specialist Email</label>
+                <input name="doctorEmail" type="email" value={formData.doctorEmail} onChange={handleChange} required placeholder="doctor@spark.com" />
+              </div>
+            </div>
 
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            required
-            style={styles.input}
-          />
+            <div className="full-width-inputs">
+              <div className="input-group">
+                <label>Chronic Conditions / Past History</label>
+                <textarea name="medicalHistory" value={formData.medicalHistory} rows="3" onChange={handleChange} placeholder="Any long-term illnesses or past surgeries..." />
+              </div>
+              <div className="input-group">
+                <label>Known Allergies</label>
+                <textarea name="allergies" value={formData.allergies} rows="2" onChange={handleChange} placeholder="Food, medicine, or seasonal allergies..." />
+              </div>
+              <div className="input-group">
+                <label>Current Symptoms</label>
+                <textarea name="symptoms" value={formData.symptoms} rows="3" onChange={handleChange} required placeholder="Describe what you are feeling today..." />
+              </div>
+            </div>
 
-          <textarea
-            placeholder="Reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            required
-            style={styles.textarea}
-          />
+            <h3 className="section-divider"><span>03</span> Appointment Scheduling</h3>
+            <div className="form-grid">
+              <div className="input-group">
+                <label>Preferred Date</label>
+                <input name="date" type="date" value={formData.date} onChange={handleChange} required />
+              </div>
+              <div className="input-group">
+                <label>Preferred Time</label>
+                <input name="time" type="time" value={formData.time} onChange={handleChange} required />
+              </div>
+            </div>
 
-          <button type="submit" style={styles.button}>
-            Book Appointment
-          </button>
-        </form>
-
-        <button onClick={handleLogout} style={styles.logout}>
-          Logout
-        </button>
-      </div>
+            <div className="form-actions">
+              <button type="submit" className="btn-submit">Confirm Registration & Book</button>
+            </div>
+          </form>
+        </section>
+      </main>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #2c7be5, #00d4ff)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  card: {
-    width: "400px",
-    backgroundColor: "white",
-    padding: "30px",
-    borderRadius: "10px",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-  },
-  input: {
-    padding: "10px",
-  },
-  textarea: {
-    padding: "10px",
-  },
-  button: {
-    padding: "10px",
-    backgroundColor: "#2c7be5",
-    color: "white",
-    border: "none",
-  },
-  logout: {
-    marginTop: "15px",
-    padding: "8px",
-  },
-};
 
 export default PatientDashboard;

@@ -2,45 +2,33 @@ import { Navigate } from "react-router-dom";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 
 function ProtectedRoute({ children, allowedRole }) {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    const checkUserRole = async () => {
-      const user = auth.currentUser;
-
-      if (!user) {
-        setAuthorized(false);
-        setLoading(false);
-        return;
-      }
-
-      const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const role = docSnap.data().role;
-
-        if (role === allowedRole) {
+    // Use onAuthStateChanged to handle refresh "lag"
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().role === allowedRole) {
           setAuthorized(true);
         } else {
           setAuthorized(false);
         }
+      } else {
+        setAuthorized(false);
       }
-
       setLoading(false);
-    };
+    });
 
-    checkUserRole();
+    return () => unsubscribe();
   }, [allowedRole]);
 
-  if (loading) return <div>Loading...</div>;
-
-  if (!authorized) return <Navigate to="/" />;
-
-  return children;
+  if (loading) return <div className="loading-spinner">Loading...</div>;
+  return authorized ? children : <Navigate to="/" />;
 }
-
 export default ProtectedRoute;
