@@ -68,7 +68,7 @@ function Login() {
 
           <div className="quote-container">
             <div className="quote-box">
-              <span className="quote-icon">“</span>
+              
               <h1 className="medical-quote">
                 Wherever the art of Medicine is loved, there is also a love of Humanity.
               </h1>

@@ -88,7 +88,7 @@ function Register() {
                 <label>Email Address</label>
                 <input 
                   type="email" 
-                  placeholder="name@email.com" 
+                  placeholder="name@gmail.com" 
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
                   required 
@@ -117,7 +117,7 @@ function Register() {
 
           <div className="quote-container" style={{background: '#f0fdf4'}}>
             <div className="quote-box">
-              <span className="quote-icon" style={{color: '#22c55e'}}>“</span>
+             
               <h1 className="medical-quote" style={{color: '#166534'}}>
                 The greatest wealth is health, and the greatest honor is serving it.
               </h1>
