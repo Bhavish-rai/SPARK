@@ -336,3 +336,83 @@
   background: #ef4444;
   color: white;
 }
+/* This triggers for Tablets and Phones */
+@media (max-width: 768px) {
+  .auth-card {
+    max-width: 95%; /* Take up more space on small screens */
+    margin: 10px;
+  }
+
+  /* Change from Side-by-Side to Stacked */
+  .auth-split {
+    flex-direction: column; 
+  }
+
+  /* Hide the quote container on very small phones to save space, 
+     or keep it and let it stack below the form */
+  .quote-container {
+    padding: 30px;
+    min-height: 200px;
+  }
+
+  .form-container {
+    padding: 30px 20px; /* Reduce padding so form doesn't look squished */
+  }
+
+  .auth-nav {
+    padding: 15px 20px;
+    flex-direction: column; /* Stack logo and button */
+    gap: 10px;
+  }
+
+  .welcome-text {
+    font-size: 1.8rem;
+  }
+}
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 768px) {
+  /* 1. Stack the containers */
+  .auth-split {
+    flex-direction: column !important;
+  }
+
+  /* 2. Hide or Shrink the quote on phones */
+  .quote-container {
+    padding: 20px !important;
+    min-height: 150px !important;
+  }
+  
+  .medical-quote {
+    font-size: 1.2rem !important;
+    line-height: 1.4 !important;
+  }
+
+  /* 3. Adjust the form padding */
+  .form-container {
+    padding: 20px !important;
+  }
+
+  /* 4. Make cards responsive */
+  .auth-card {
+    width: 95% !important;
+    margin: 10px auto !important;
+    border-radius: 12px !important;
+  }
+
+  /* 5. Force grids to one column */
+  .form-grid, .doctor-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media (max-width: 768px) {
+  .auth-nav {
+    flex-direction: column;
+    padding: 15px !important;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .nav-links {
+    gap: 15px !important;
+  }
+}

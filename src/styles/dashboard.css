@@ -371,3 +371,25 @@ input:focus, textarea:focus, select:focus {
   .dashboard-content { padding: 0 12px; }
   .main-content { grid-template-columns: 1fr; }
 }
+@media (max-width: 1024px) {
+  /* Stack the Sidebar and the Main Terminal */
+  .main-content {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .doc-layout {
+    overflow-x: hidden;
+  }
+
+  /* Make Grid items 1 per row instead of 3 */
+  .form-grid, .doctor-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
